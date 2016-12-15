@@ -1,0 +1,43 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-2 main">
+
+      <br><br>
+
+      <p style="background:#e6ffe6;">New revision: <%= I18n.l @revision1.created_at, format: :long %></p>
+      <p style="background:#ffe6e6;">Old revision: <%= I18n.l @revision2.created_at, format: :long %></p>
+
+      <h1 id="title"></h1>
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <p id="description"></p>
+          <p>Cost: <span id="cost"></span></p>
+        </div>
+      </div>
+
+<script src="/js/diff_match_patch.js"></script>
+<script>
+var revision1 = <%= @revision1_json.to_json.html_safe %>;
+var revision2 = <%= @revision2_json.to_json.html_safe %>;
+
+function f(id, text1, text2) {
+  var dmp = new diff_match_patch();
+  var d = dmp.diff_main(text2, text1);
+  dmp.Diff_EditCost = 4;
+  dmp.diff_cleanupSemantic(d);
+  document.getElementById(id).innerHTML = dmp.diff_prettyHtml(d);
+}
+/*
+var dmp = new diff_match_patch();
+var d = dmp.diff_main(revision1.description, revision2.description);
+dmp.diff_cleanupSemantic(d);
+document.getElementById("body").innerHTML = dmp.diff_prettyHtml(d);
+*/
+f("title", revision1.title, revision2.title);
+f("description", revision1.description, revision2.description);
+f("cost", revision1.cost_string, revision2.cost_string);
+</script>
+
+  </div>
+</div>

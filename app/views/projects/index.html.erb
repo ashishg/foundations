@@ -1,0 +1,68 @@
+<div class="container" style="margin-bottom: 0;">
+  <div class="starter-template">
+    <h1>Proposed projects</h1>
+    <p class="lead" style="margin-bottom: 0;">Click here to propose a <a href="/projects/new">new project</a>.</p>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1 main">
+
+<div style="text-align: right">
+  Sort by&nbsp;
+  <div class="dropdown" style="display: inline-block">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <%= @sort.capitalize %>
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li><a href="/">Votes</a></li>
+      <li><a href="/?sort=name">Name</a></li>
+      <li><a href="/?sort=date">Date</a></li>
+    </ul>
+  </div>
+</div>
+
+<br>
+
+<style>
+.ab {
+  background-color: #ccc; width: 64px; height: 64px; line-height: 64px; text-align: center;
+  font-size: 20px;
+}
+</style>
+
+<ul class="list-group">
+
+<% @projects.each do |project| %>
+  <li class="list-group-item">
+    <div class="media" style="background-color: white">
+      <div class="media-left">
+        <div class="ab"><%= project.vote_count %></div>
+      </div>
+      <div class="media-body">
+        <h4 class="media-heading"><a href="<%= project_path(project.id) %>"><%= project.title %></a></h4>
+        <%= project.description %><br>
+        <% if !project.address.blank? %>
+          <%= project.address %><br>
+        <% end %>
+        <div>Cost: <%= project.cost_string %></div>
+        <br>
+        <% if current_user %>
+          <a class="btn <%= !@votes.include?(project.id) ? 'btn-default' : 'btn-success' %>" href="/projects/<%= project.id %>/vote">Vote</a>
+        <% else %>
+        <a class="btn btn-default" href="/projects/<%= project.id %>/vote">Vote</a>
+        <% end %>
+        <br><br>
+      </div>
+    </div>
+  </li>
+<% end %>
+</ul>
+
+
+    </div>
+  </div>
+</div>
+

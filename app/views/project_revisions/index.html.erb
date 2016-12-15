@@ -1,0 +1,53 @@
+<!--
+<div class="container">
+  <div class="starter-template">
+    <h1>Project revisions</h1>
+    <p class="lead">Choose two revisions to compare.</p>
+  </div>
+</div>
+-->
+
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-2 main">
+
+
+      <h1><%= @project.title %></h1>
+      <p>Choose two revisions to compare.</p>
+
+<style>
+.ab {
+  background-color: #ccc; width: 64px; height: 64px; line-height: 64px; text-align: center;
+  font-size: 20px;
+}
+</style>
+
+<% @project_revisions.each_with_index do |revision, index| %>
+  <div>
+    <input type="radio" name="revision_left" value="<%= revision.id %>" <%= (index == 0) ? ' checked' : '' %> />
+    &nbsp;
+    <input type="radio" name="revision_right" value="<%= revision.id %>" <%= (index == 1) ? ' checked' : '' %> />
+    &nbsp;
+    #<%= @project_revisions.length - index %> (<%= I18n.l revision.created_at, format: :long %>)
+  </div>
+<% end %>
+<br>
+<div>
+  <button id="compare_button" class="btn btn-primary">Compare</button>
+</div>
+
+<script>
+$("#compare_button").click(function() {
+  var left = $('input[name=revision_left]:checked').val();
+  var right = $('input[name=revision_right]:checked').val();
+  window.location.href = "/projects/<%= @project.id %>/revisions/compare/" + left + "/" + right;
+});
+</script>
+
+
+    </div>
+  </div>
+</div>
+

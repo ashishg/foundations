@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Project</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<style>
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Project name</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
+<div class="container">
+  <div class="starter-template">
+    <h1>Propose a new project</h1>
+    <p class="lead">Use the form below to propose a new project.</p>
+  </div>
+</div>
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1 main">
+
+<style>
+.data-form {
+  width: 100%;
+}
+
+.data-form td {
+  padding-bottom: 4px;
+}
+
+.error {
+  color: red;
+}
+
+.ace_hidden-cursors {
+  display: none;
+}
+</style>
+
+<form id="new_project" enctype="multipart/form-data" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" />
+  <table class="data-form">
+    <tr>
+      <td style="width: 120px;"><label for="project_title">Title</label></td>
+      <td><input class="form-control" type="text" name="project[title]" id="project_title" /></td>
+    </tr>
+    <tr>
+      <td><label for="project_description">Description</label></td>
+      <td><textarea rows="6" class="form-control" name="project[description]" id="project_description">
+</textarea></td>
+    </tr>
+    <tr>
+      <td><label for="project_cost">Cost</label></td>
+      <td>
+        <div class="input-group">
+          <div class="input-group-addon">$</div>
+          <input class="form-control" type="text" name="project[cost]" id="project_cost" />
+        </div>
+        <div class="checkbox">
+          <label>
+            <input name="project[adjustable_cost]" type="hidden" value="0" /><input type="checkbox" value="1" name="project[adjustable_cost]" id="project_adjustable_cost" /> Adjustable
+          </label>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><label for="project_Location">Location</label></td>
+      <td><input class="form-control" type="text" name="project[address]" id="project_address" /></td>
+    </tr>
+    <!--
+    <tr>
+      <td><label for="project_Map location coordinates">Map location coordinates</label></td>
+      <td>
+        <input class="form-control" type="text" name="project[map_geometry]" id="project_map_geometry" />
+        <p class="help-block">(An array of points. A point is an array of a latitude and a longitude.)</p>
+      </td>
+    </tr>
+    -->
+    <tr>
+      <td><label for="project_category">Category</label></td>
+      <td><select class="form-control" name="project[category_id]" id="project_category_id"><option value="">Uncategorized</option>
+</select></td>
+    </tr>
+    <tr>
+      <td><label for="project_image">Image</label></td>
+      <td>
+        <input accept="image/*" type="file" name="project[image]" id="project_image" />
+        <input type="hidden" name="project[image_cache]" id="project_image_cache" />
+      </td>
+    </tr>
+    <tr>
+      <td><label for="project_YouTube URL">URL</label></td>
+      <td><input class="form-control" type="text" name="project[video_url]" id="project_video_url" /></td>
+    </tr>
+  </table>
+  <input type="submit" name="commit" value="Save" class="btn btn-primary" />
+</form>
+
+    </div>
+  </div>
+</div>
+
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>

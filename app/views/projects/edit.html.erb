@@ -1,0 +1,174 @@
+<div class="container">
+  <div class="starter-template">
+    <h1>Edit project</h1>
+  </div>
+</div>
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-7 col-sm-offset-1 main">
+
+<style>
+.data-form {
+  width: 100%;
+}
+
+.data-form td {
+  padding-bottom: 4px;
+}
+
+.error {
+  color: red;
+}
+</style>
+
+<script>
+function kp() {
+  var projects = <%= @projects.to_json.html_safe %>;
+  if (projects == null)
+    projects = [];
+  var e = document.getElementById('project_title');
+  var rp = document.getElementById('rp');
+  var s = e.value;
+  if (s.length == 0) {
+    rp.innerHTML = '<i>No matched projects.</i>';
+    return;
+  }
+
+  var html = '';
+  projects.sort(function(x,y) { return y.vote_count - x.vote_count });
+  var re = new RegExp("(" + s + ")", "i");
+  var replacePattern = '<u style="color: #1b809e">$1</u>';
+  for (var i = 0; i < projects.length; ++i) {
+    var p = projects[i];
+    if (p.title.toLowerCase().indexOf(s) != -1 ||
+      p.description.toLowerCase().indexOf(s) != -1) {
+
+      html += '<div class="media">' +
+        '<div class="media-left">' +
+          '<div class="ab">' + p.vote_count + '</div>' +
+        '</div>' +
+        '<div class="media-body">' +
+          '<h4 class="media-heading">' + p.title.replace(re, replacePattern) + '</h4>' +
+          '' + p.description.replace(re, replacePattern) + '<br>' +
+          'Cost: $' + p.cost +
+        '</div>' +
+      '</div>';
+    }
+  }
+
+  rp.innerHTML = html;
+}
+</script>
+
+<% @project.errors.full_messages.each do |msg| %>
+  <p class="error"><%= msg %></p>
+<% end %>
+
+<%= form_for(@project) do |f| %>
+  <table class="data-form">
+    <tr class="<%= !@project.errors[:title].empty? ? 'has-error' : '' %>">
+      <td style="width: 120px;"><label for="project_title">Title</label></td>
+
+      <td><%= f.text_field :title, class: 'form-control', onkeyup: 'kp()' %></td>
+    </tr>
+    <tr class="<%= !@project.errors[:description].empty? ? 'has-error' : '' %>">
+      <td><label for="project_description">Description</label></td>
+      <td><%= f.text_area :description, rows: 6, class: 'form-control' %></td>
+    </tr>
+    <tr>
+      <td><label for="project_cost">Cost</label></td>
+      <td>
+
+        <div class="form-inline">
+          <span class="min" style="display: none;">
+            <div class="input-group">
+              <div class="input-group-addon">$</div>
+              <span class="<%= !@project.errors[:cost_min].empty? ? 'has-error' : '' %>">
+                <%= f.text_field :cost_min, class: 'form-control' %>
+              </span>
+            </div>
+            to
+          </span>
+          <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <span class="<%= !@project.errors[:cost].empty? ? 'has-error' : '' %>">
+              <%= f.text_field :cost, class: 'form-control' %>
+            </span>
+          </div>
+        </div>
+
+
+
+
+        
+      </td>
+    </tr>
+
+    <tr class="min" style="display: none;">
+      <td><label>Incremental amount</label></td>
+      <td>
+        <div class="input-group min" style="display: none;">
+          <div class="input-group-addon">$</div>
+          <%= f.text_field :cost_step, class: 'form-control' %>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td>
+        <div class="checkbox">
+          <label>
+            <!--<input name="project[adjustable_cost]" type="hidden" value="0" />-->
+            <%= f.check_box :uses_slider %> Adjustable
+          </label>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :address, 'Location' %></td>
+      <td><%= f.text_field :address, class: 'form-control' %></td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :url, 'URL' %></td>
+      <td><%= f.text_field :url, class: 'form-control' %></td>
+    </tr>
+
+
+  </table>
+  <%= f.submit 'Save', class: 'btn btn-primary' %>
+<% end %>
+
+    </div>
+
+    <div class="col-sm-3">
+      <h3>Related projects</h3>
+      <div id="rp"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function updateSlider() {
+  if ($('#project_uses_slider').is(':checked')) {
+    $('.min').show();
+  } else {
+    $('.min').hide();
+  }
+}
+$('#project_uses_slider').click(function() {
+  updateSlider();
+});
+updateSlider();
+
+
+kp();
+</script>
+
+<br><br>
+

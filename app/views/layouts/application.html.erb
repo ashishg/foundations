@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pp</title>
+  <%= csrf_meta_tags %>
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body {
+  padding-top: 50px;
+  
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+</style>
+<%= javascript_include_tag 'application' %>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">PB</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="/projects/">Home</a></li>
+        <li><a href="/projects/new">New</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <% if current_user.nil? %>
+          <li><a href="/users/login">Log In</a></li>
+        <% else %>
+          <li><a href="/users/<%= current_user.id %>">Profile</a></li>
+          <li><a href="/users/logout">Log Out</a></li>
+        <% end %>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
+
+<%= yield %>
+
+
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+
+</body>
+</html>

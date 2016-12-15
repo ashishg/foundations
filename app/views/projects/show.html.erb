@@ -1,0 +1,63 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-2 main">
+      <h1><%= @project.title %></h1>
+
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+
+      <p>
+      <%#= @project.description %>
+        <%= h(@project.description).gsub("\n", '<br>').gsub('  ', '&nbsp;').html_safe %>
+      </p>
+
+      <% if !@project.url.blank? %>
+        <p>URL: <a href="<%= @project.url %>" target="_blank"><%= @project.url %></a></p>
+      <% end %>
+
+      <% if !@project.uses_slider %>
+        <div>Cost: $<%= number_with_delimiter(@project.cost) %></div>
+      <% else %>
+        <div>Cost: $<%= number_with_delimiter(@project.cost_min) %> - $<%= number_with_delimiter(@project.cost) %></div>
+      <% end %>
+
+      <div>
+        <% if current_user == @project.user %>
+          <a href="<%= edit_project_path(id: @project.id) %>"><span class="glyphicon glyphicon-pencil"></span> Edit</a> &nbsp; | &nbsp;
+        <% end %>
+        <a href="<%= project_project_revisions_path(project_id: @project.id) %>">History</a>
+      </div>
+
+        </div>
+      </div>
+
+      <!--<h3>Comments</h3>-->
+
+      <% @project.comments.each_with_index do |comment, index| %>
+        <div class="panel panel-default">
+          <div class="panel-heading">Comment #<%= index + 1 %></div>
+          <div class="panel-body">
+            <p>
+              <% if comment.project_revision.nil? %>
+                <%= comment.body.html_safe %>
+              <% else %>
+                <a href="/projects/<%= @project.id %>/revisions/compare/<%= comment.project_revision.id %>"><i>New revision</i></a>
+              <% end %>
+            </p>
+            <div><!--By <%= comment.user.name %> -->(<%= I18n.l comment.created_at, format: :long %>)</div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form_for([@project, @comment]) do |f| %>
+        Add comment
+        <p>
+          <%= f.text_area :body, class: 'form-control' %>
+        </p>
+        <p>
+          <%= f.submit 'Submit', class: 'btn btn-primary' %>
+        </p>
+      <% end %>
+  </div>
+</div>
