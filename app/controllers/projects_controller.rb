@@ -81,14 +81,19 @@ class ProjectsController < ApplicationController
   end
 
   def vote
-    project = Project.find(params[:id])
+    @project = Project.find(params[:id])
+
+
+    puts "##########################################"
+    puts @project.id
+    puts current_user.id
     #project.vote_count = project.vote_count + 1
     #project.save
 
-    vote = Vote.find_by(project_id: project.id, user_id: current_user.id)
+    vote = Vote.find_by(project_id: @project.id, user_id: current_user.id)
     if vote.nil?
       vote = Vote.new
-      vote.project = project
+      vote.project = @project
       vote.user = current_user
       vote.save
     else

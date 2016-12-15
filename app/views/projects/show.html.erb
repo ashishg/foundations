@@ -15,12 +15,16 @@
       <% if !@project.url.blank? %>
         <p>URL: <a href="<%= @project.url %>" target="_blank"><%= @project.url %></a></p>
       <% end %>
+  
+      <p>
+        <% if !@project.uses_slider %>
+          <div>Cost: $<%= number_with_delimiter(@project.cost) %></div>
+        <% else %>
+          <div>Cost: $<%= number_with_delimiter(@project.cost_min) %> - $<%= number_with_delimiter(@project.cost) %></div>
+        <% end %>
+      </p>
 
-      <% if !@project.uses_slider %>
-        <div>Cost: $<%= number_with_delimiter(@project.cost) %></div>
-      <% else %>
-        <div>Cost: $<%= number_with_delimiter(@project.cost_min) %> - $<%= number_with_delimiter(@project.cost) %></div>
-      <% end %>
+      <p>Created by: <%= @project.user.name %></p>
 
       <div>
         <% if current_user == @project.user %>
@@ -45,7 +49,7 @@
                 <a href="/projects/<%= @project.id %>/revisions/compare/<%= comment.project_revision.id %>"><i>New revision</i></a>
               <% end %>
             </p>
-            <div><!--By <%= comment.user.name %> -->(<%= I18n.l comment.created_at, format: :long %>)</div>
+            <div>By <%= comment.user.name %> (<%= I18n.l comment.created_at, format: :long %>)</div>
           </div>
         </div>
       <% end %>

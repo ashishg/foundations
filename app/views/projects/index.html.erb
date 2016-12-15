@@ -48,6 +48,18 @@
           <%= project.address %><br>
         <% end %>
         <div>Cost: <%= project.cost_string %></div>
+        <div>Created by: <%= project.user.name %></div>
+        <% if project.vote_count > 0 %>
+          <div>Voted by:
+            <% Vote.where(project_id: project.id).each_with_index do |vote, index| %>
+              <% if index > 0 %>
+              ,
+              <% end %> 
+              <%= vote.user.name %>
+            <% end %>
+          </div>
+        <% end %>
+
         <br>
         <% if current_user %>
           <a class="btn <%= !@votes.include?(project.id) ? 'btn-default' : 'btn-success' %>" href="/projects/<%= project.id %>/vote">Vote</a>
