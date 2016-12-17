@@ -24,7 +24,9 @@
         <% end %>
       </p>
 
-      <p>Created by: <%= @project.user.name %></p>
+      <% if !@config["anonymous"] %>
+        <p>Created by: <%= @project.user.name %></p>
+      <% end %>
 
       <div>
         <% if current_user == @project.user %>
@@ -49,7 +51,9 @@
                 <a href="/projects/<%= @project.id %>/revisions/compare/<%= comment.project_revision.id %>"><i>New revision</i></a>
               <% end %>
             </p>
-            <div>By <%= comment.user.name %> (<%= I18n.l comment.created_at, format: :long %>)</div>
+            <% if !@config["anonymous"] %>
+              <div>By <%= comment.user.name %> (<%= I18n.l comment.created_at, format: :long %>)</div>
+            <% end %>
           </div>
         </div>
       <% end %>

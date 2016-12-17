@@ -1,5 +1,9 @@
+require 'yaml'
+
 class ProjectsController < ApplicationController
+
   def index
+    @config = YAML.load_file('app/models/config_description.yml')
     @sort = params[:sort].nil? ? "votes" : params[:sort]   # FIXME: Injection!!!
 
     if @sort == "votes"
@@ -21,11 +25,13 @@ class ProjectsController < ApplicationController
   end
 
   def show
+    @config = YAML.load_file('app/models/config_description.yml')
     @project = Project.find(params[:id])
     @comment = Comment.new
   end
 
   def new
+    @config = YAML.load_file('app/models/config_description.yml')
     @projects = Project.all
     @project = Project.new
     @project.cost_step = 1
@@ -81,19 +87,15 @@ class ProjectsController < ApplicationController
   end
 
   def vote
-    @project = Project.find(params[:id])
+    project = Project.find(params[:id])
 
-
-    puts "##########################################"
-    puts @project.id
-    puts current_user.id
     #project.vote_count = project.vote_count + 1
     #project.save
 
-    vote = Vote.find_by(project_id: @project.id, user_id: current_user.id)
+    vote = Vote.find_by(project_id: project.id, user_id: current_user.id)
     if vote.nil?
       vote = Vote.new
-      vote.project = @project
+      vote.project = project
       vote.user = current_user
       vote.save
     else

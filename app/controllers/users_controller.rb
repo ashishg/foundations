@@ -26,92 +26,21 @@ class UsersController < ApplicationController
   end
 
   def new
-    # This action can be called from two different URLs.
-    # We might want to split it into two actions in the future.
-    if params.key?(:election_id)
-      # This is called from GET /admin/elections/:election_id/users/new
-      require_admin_auth
-      return if performed?
-      @election = Election.find(params[:election_id])
-      @user = User.new
-      @election_user = ElectionUser.new
-      @can_create_user_types = can_create_user_types
-    else
-      # This is called from GET /admin/users/new
-      require_superadmin_auth
-      return if performed?
-      @user = User.new
-    end
+    @user = User.new
   end
 
   def create
-    # This action can be called from two different URLs.
-    # We might want to split it into two actions in the future.
-    if params.key?(:election_id)
-      # This is called from POST /admin/elections/:election_id/users
-      require_admin_auth
-      return if performed?
-      @election = Election.find(params[:election_id])
-      @user = User.new(user_params)
-      @can_create_user_types = can_create_user_types
+    @user = User.new
+    @user.email = params[:email]
+    if params[:type] == 'admin'
+      @user.isadmin = true
+    end 
+    if @user.save
+      send_confirmation(@user)
+      flash[:notice] = 'Users created successfully: ' + @user.email
+      redirect_to({action: :new}, flash: {notice: 'Users created successfully: ' + @user.email, errors: "Something went wrong."})
     else
-      # This is called from POST /admin/users
-      require_superadmin_auth
-      return if performed?
-      @user = User.new(user_params)
-
-      # Since this action can create a new superadmin, we require extra security
-      if !current_user.authenticate(params[:user][:current_password])
-        flash.now[:errors] = ['Wrong password']
-        render action: :new
-        return
-      end
-    end
-
-    successes = []
-    errors = []
-    params[:user][:username].split(/[;,]/).reject(&:blank?).each do |username|
-      username = username.strip.downcase
-
-      ActiveRecord::Base.transaction do
-        # Create a new user
-        user = User.find_by(username: username)
-        if user.nil?
-          user = User.new
-          user.username = username
-          user.is_superadmin = params[:user][:is_superadmin] if !params.key?(:election_id)
-          if !user.save
-            errors << username + ': ' + user.errors.full_messages.join(', ')
-            raise ActiveRecord::Rollback
-          end
-          
-          # Send the confirmation email
-          begin
-            send_confirmation(user, @election)
-          rescue Net::SMTPFatalError => e
-            errors << username + ': ' + e.message
-            raise ActiveRecord::Rollback
-          end
-        end
-
-        # Add the user to a specific election, if any
-        if @election
-          @election_user = ElectionUser.new(election_id: @election.id, user_id: user.id, status: params[:status])
-          if !@election_user.save
-            errors << username + ': ' + @election_user.errors.full_messages.join(', ')
-            raise ActiveRecord::Rollback
-          end
-        end
-
-        successes << username
-        log_activity('user_create', user.id.to_s)
-      end
-    end
-
-    if !successes.empty?
-      redirect_to({action: :new}, flash: {notice: 'Users created successfully: ' + successes.join(', '), errors: errors})
-    else
-      flash.now[:errors] = errors
+      flash.now[:errors] = "Something went wrong."
       render action: :new
     end
   end
@@ -307,18 +236,18 @@ class UsersController < ApplicationController
     params.require('user').permit(:username, :password, :password_confirmation)
   end
 
-  def send_confirmation(user, election)
+  def send_confirmation(user)
     chars = (('a'..'z').to_a + ('0'..'9').to_a) - ['o', '0', '1', 'l', 'q']
     new_confirmation_id = (0...32).map { chars.sample }.join
     user.update_attribute(:confirmation_id, new_confirmation_id)
-    UserMailer.confirmation_email(user, election).deliver
+    UserMailer.confirmation_email(user, request.base_url).deliver_now
   end
 
   def send_reset_password_email(user)
     chars = (('a'..'z').to_a + ('0'..'9').to_a) - ['o', '0', '1', 'l', 'q']
     new_confirmation_id = (0...32).map { chars.sample }.join
     user.update_attribute(:confirmation_id, new_confirmation_id)
-    UserMailer.reset_password_email(user).deliver
+    UserMailer.reset_password_email(user, request.base_url).deliver_now
   end
 
   def can_create_user_types

@@ -1,0 +1,5 @@
+--- 
+javascripts: 
+- fo_global:
+  - lazyload-min
+  - holla-min

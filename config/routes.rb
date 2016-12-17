@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :users do
     collection do
       get 'login'
+      post 'create'
       post 'post_login'
       get 'logout'
       get 'reset_password_page'
