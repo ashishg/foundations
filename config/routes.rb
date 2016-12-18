@@ -18,15 +18,17 @@ Rails.application.routes.draw do
       post 'create'
       post 'post_login'
       get 'logout'
-      get 'reset_password_page'
-      post 'reset_password'
+      get 'reset_password_form'
+      post 'post_reset_password_form'
     end
     member do
       get 'validate_confirmation'
-      post 'set_password'
+      post 'set_password_and_info'
       get 'confirmation_sent'
       get 'validate_reset_password'
       get 'edit_password'
+      get 'reset_password'
+      post 'post_reset_password'
       patch 'update_password'
       get 'resend_confirmation'
     end
