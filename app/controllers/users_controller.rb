@@ -123,7 +123,7 @@ class UsersController < ApplicationController
     @previous_url = params[:previous_url]
     if current_user.nil? || !@previous_url.blank?
     else
-      redirect_to "/"
+      redirect_to "/projects/index"
     end
   end
 
@@ -141,7 +141,7 @@ class UsersController < ApplicationController
       if !previous_url.blank?
         redirect_to previous_url
       else
-        redirect_to "/"
+        redirect_to "/projects/index"
       end
     else
       flash[:error] = 'Wrong username and/or password'
