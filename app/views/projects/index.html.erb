@@ -1,7 +1,11 @@
 <div class="container" style="margin-bottom: 0;">
   <div class="starter-template">
-    <h1>Proposed projects</h1>
+    <h1><%= @config["welcome"]%></h1>
     <p class="lead" style="margin-bottom: 0;">Click here to propose a <a href="/projects/new">new project</a>.</p>
+    <% if current_user.isadmin %>
+      <p class="lead" style="margin-bottom: 0;">Click here to add a <a href="/users/new">new user</a>.</p>
+    <% end %>
+
   </div>
 </div>
 
@@ -48,6 +52,20 @@
           <%= project.address %><br>
         <% end %>
         <div>Cost: <%= project.cost_string %></div>
+        <% if !@config["anonymous"] %>
+          <div>Created by: <%= project.user.name %></div>
+          <% if project.vote_count > 0 %>
+            <div>Voted by:
+              <% Vote.where(project_id: project.id).each_with_index do |vote, index| %>
+                <% if index > 0 %>
+                ,
+                <% end %> 
+                <%= vote.user.name %>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
         <br>
         <% if current_user %>
           <a class="btn <%= !@votes.include?(project.id) ? 'btn-default' : 'btn-success' %>" href="/projects/<%= project.id %>/vote">Vote</a>

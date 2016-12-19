@@ -26,92 +26,22 @@ class UsersController < ApplicationController
   end
 
   def new
-    # This action can be called from two different URLs.
-    # We might want to split it into two actions in the future.
-    if params.key?(:election_id)
-      # This is called from GET /admin/elections/:election_id/users/new
-      require_admin_auth
-      return if performed?
-      @election = Election.find(params[:election_id])
-      @user = User.new
-      @election_user = ElectionUser.new
-      @can_create_user_types = can_create_user_types
-    else
-      # This is called from GET /admin/users/new
-      require_superadmin_auth
-      return if performed?
-      @user = User.new
-    end
+    @user = User.new
   end
 
   def create
-    # This action can be called from two different URLs.
-    # We might want to split it into two actions in the future.
-    if params.key?(:election_id)
-      # This is called from POST /admin/elections/:election_id/users
-      require_admin_auth
-      return if performed?
-      @election = Election.find(params[:election_id])
-      @user = User.new(user_params)
-      @can_create_user_types = can_create_user_types
+    @user = User.new
+    @user.email = params[:email]
+    if params[:type] == 'admin'
+      @user.isadmin = true
+    end 
+    if @user.save
+      send_confirmation(@user)
+      flash[:notice] = "Users created successfully: " + @user.email
+      render action: :new
+      # redirect_to({action: :new}, flash: {notice: 'Users created successfully: ' + @user.email, errors: "Something went wrong."})
     else
-      # This is called from POST /admin/users
-      require_superadmin_auth
-      return if performed?
-      @user = User.new(user_params)
-
-      # Since this action can create a new superadmin, we require extra security
-      if !current_user.authenticate(params[:user][:current_password])
-        flash.now[:errors] = ['Wrong password']
-        render action: :new
-        return
-      end
-    end
-
-    successes = []
-    errors = []
-    params[:user][:username].split(/[;,]/).reject(&:blank?).each do |username|
-      username = username.strip.downcase
-
-      ActiveRecord::Base.transaction do
-        # Create a new user
-        user = User.find_by(username: username)
-        if user.nil?
-          user = User.new
-          user.username = username
-          user.is_superadmin = params[:user][:is_superadmin] if !params.key?(:election_id)
-          if !user.save
-            errors << username + ': ' + user.errors.full_messages.join(', ')
-            raise ActiveRecord::Rollback
-          end
-          
-          # Send the confirmation email
-          begin
-            send_confirmation(user, @election)
-          rescue Net::SMTPFatalError => e
-            errors << username + ': ' + e.message
-            raise ActiveRecord::Rollback
-          end
-        end
-
-        # Add the user to a specific election, if any
-        if @election
-          @election_user = ElectionUser.new(election_id: @election.id, user_id: user.id, status: params[:status])
-          if !@election_user.save
-            errors << username + ': ' + @election_user.errors.full_messages.join(', ')
-            raise ActiveRecord::Rollback
-          end
-        end
-
-        successes << username
-        log_activity('user_create', user.id.to_s)
-      end
-    end
-
-    if !successes.empty?
-      redirect_to({action: :new}, flash: {notice: 'Users created successfully: ' + successes.join(', '), errors: errors})
-    else
-      flash.now[:errors] = errors
+      flash[:errors] = "Something went wrong."
       render action: :new
     end
   end
@@ -193,8 +123,12 @@ class UsersController < ApplicationController
     @previous_url = params[:previous_url]
     if current_user.nil? || !@previous_url.blank?
     else
-      redirect_to "/"
+      redirect_to "/projects"
     end
+  end
+
+  def reset_password_form
+    login
   end
 
   def post_login
@@ -202,13 +136,12 @@ class UsersController < ApplicationController
     previous_url = params[:previous_url]
 
     user = User.find_by(username: username)
-    #if user && user.confirmed && !params[:user][:password].blank? && user.authenticate(params[:user][:password]) 
-    if user   # HACKY!!!
+    if user && !params[:user][:password].blank? && params[:user][:password] == user.password_digest
       session[:user_id] = user.id
       if !previous_url.blank?
         redirect_to previous_url
       else
-        redirect_to "/"
+        redirect_to "/projects"
       end
     else
       flash[:error] = 'Wrong username and/or password'
@@ -223,61 +156,68 @@ class UsersController < ApplicationController
     redirect_to action: :login
   end
 
-  # page to set password and set password
+  # page to set password
   def validate_confirmation
-    user = User.find_by_id(params[:id])
-    if !user.confirmation_id.blank? && params[:confirmation_id] == user.confirmation_id
-      @confirmed = true
-      @confirmation_id = params[:confirmation_id]
-    else
-      @confirmed = false
+    user = User.find_by(id: params[:id])
+    @authentication_status = authenticate_confirmation_id(user, params[:confirmation_id])
+    if @authentication_status == :ok
+        @confirmation_id = params[:confirmation_id]
     end
   end
 
-  # to set password
-  def set_password
-    user = User.find_by_id(params[:id])
-    # FIXME: we should have an expiration date for password reset!
-    if params[:user][:confirmation_id] == user.confirmation_id
-      user.confirmed = true
-      user.password = params[:user][:password]
-      user.password_confirmation = params[:user][:password_confirmation]
-      user.confirmation_id = nil
-      if user.save
-        session[:user_id] = user.id
-        if user.superadmin? or user.election_users.count != 1
-          redirect_to "/admin"
-        else
-          redirect_to admin_election_url(user.election_users.first.election)
-        end
-      else
-        @confirmed = true
-        @confirmation_id = params[:user][:confirmation_id]
-        flash.now[:errors] = user.errors.full_messages
-        render action: :validate_confirmation
+  def authenticate_confirmation_id(user, confirmation_id)
+      if !user.nil? && !user.confirmation_id.blank? && confirmation_id == user.confirmation_id
+        return :ok
       end
+
+      log_activity('validate_confirmation_failure', note: params[:id])
+      return :error
+  end
+
+  # to set username, password and name
+  def set_password_and_info
+    user = User.find_by_id(params[:id])
+    user.username = params[:user][:username]
+    user.password_digest = params[:user][:password]
+    user.name = params[:user][:name]
+    if user.save
+      session[:user_id] = user.id
+      redirect_to "/"
     else
-      # likely under attack
+      @confirmed = true
+      @confirmation_id = params[:user][:confirmation_id]
+      flash.now[:errors] = user.errors.full_messages
+      render action: :validate_confirmation
+    end
+  end
+
+  def post_reset_password_form
+    @user = User.find_by(email: params[:user][:email])
+    if @user
+      send_password_reset_email(@user)
+      flash[:notice] = "A password reset email has been sent to " + @user.email
+      redirect_to "/users/login"
+    else
+      flash[:errors] = "Something went wrong."
+      redirect_to "/users/reset_password_form"
+    end
+  end
+
+  def reset_password
+    user = User.find_by_id(params[:id])
+    if user.confirmation_id != params[:confirmation_id]
+      flash[:errors] = "Something went wrong."
+      redirect_to "/users/reset_password_form"
     end
   end
 
   # reset password
-  def reset_password
-    username = params[:user][:username].strip.downcase
-
-    if ActivityLog.where("activity = 'reset_password' AND ip_address = ? AND created_at >= ?", request.remote_ip, 1.minute.ago).count >= 8
-      redirect_to "/admin/users/reset_password_page" , flash: {errors: ["Please wait one minute and try again."]}
-      return
-    end
-
-    log_activity('reset_password', username)
-    user = User.find_by(username: username)
-    if !user.nil?
-      send_reset_password_email(user)
-      redirect_to "/admin/users/#{user.id}/confirmation_sent"
-    else
-      redirect_to "/admin/users/reset_password_page", flash: {errors: ["Sorry, there is no such user."]}
-    end      
+  def post_reset_password
+    user = User.find_by_id(params[:id])
+    user.password_digest = params[:user][:password]
+    user.save
+    flash[:notice] = "Your password has been reset."
+    redirect_to "/users/login"
   end
 
   def resend_confirmation
@@ -307,18 +247,23 @@ class UsersController < ApplicationController
     params.require('user').permit(:username, :password, :password_confirmation)
   end
 
-  def send_confirmation(user, election)
+  def send_confirmation(user)
     chars = (('a'..'z').to_a + ('0'..'9').to_a) - ['o', '0', '1', 'l', 'q']
     new_confirmation_id = (0...32).map { chars.sample }.join
     user.update_attribute(:confirmation_id, new_confirmation_id)
-    UserMailer.confirmation_email(user, election).deliver
+    UserMailer.confirmation_email(user, request.base_url).deliver_now
   end
+
+  def send_password_reset_email(user)
+    UserMailer.reset_password_email(user, request.base_url).deliver_now
+  end
+
 
   def send_reset_password_email(user)
     chars = (('a'..'z').to_a + ('0'..'9').to_a) - ['o', '0', '1', 'l', 'q']
     new_confirmation_id = (0...32).map { chars.sample }.join
     user.update_attribute(:confirmation_id, new_confirmation_id)
-    UserMailer.reset_password_email(user).deliver
+    UserMailer.reset_password_email(user, request.base_url).deliver_now
   end
 
   def can_create_user_types

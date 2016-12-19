@@ -149,6 +149,13 @@ function kp() {
     <div class="col-sm-3">
       <h3>Related projects</h3>
       <div id="rp"></div>
+
+      <h3><%= @config["sidebartitle"] %></h3>
+      <ul>
+        <% @config["links"].each do |link| %>
+          <li><a href=<%= link[0] %> target="_blank"><%= link[1] %></a></li>
+        <%end %>        
+      </ul>
     </div>
 
   </div>

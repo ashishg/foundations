@@ -1,0 +1,20 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-10 col-sm-offset-1 main">
+      <h2>New User</h2>
+        <% if flash[:notice] %>
+           <p><%= flash[:notice] %></p>
+        <% end %>
+        <form action="/users/create" method="post">
+          Email address: <input type="text" name="email"> <br>
+          <input type="radio" name="type" value="user" checked> User<br>
+          <input type="radio" name="type" value="admin"> Admin<br>
+          <p class="help-block">
+            Users can vote.
+            Admins can vote and create new users.
+          </p>
+          <input type="hidden" name="authenticity_token" value=<%= form_authenticity_token %>>
+          <input type="submit" value="Create">
+    </div>
+  </div>
+</div>

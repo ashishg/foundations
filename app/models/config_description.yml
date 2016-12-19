@@ -1,0 +1,22 @@
+welcome:
+  "Welcome to the foundation project."
+
+anonymous:
+  false
+
+sidebartitle:
+  "Suggested Charities"
+
+links:
+  [["https://www.directrelief.org/2015/12/forbes-ranks-direct-relief-among-nations-ten-top-charities/?gclid=CjwKEAiAvs7CBRC24rao6bGCoiASJABaCt5D4drDSnLVlRSTRzmw_wgme6aepfnqOjw1gj4lpTIM8BoCTgXw_wcB", "Top 10 Charity Report"], 
+   ["https://www.unitedway.org/", "United Way"], 
+   ["https://www.salvationarmyusa.org/", "Salvation Army"], 
+   ["https://www.feedingamerica.org/", "Feeding America"], 
+   ["https://www.taskforce.org/", "Task Force for Global Health"],
+   ["https://www.stjude.org/", "St. Jude‎"],
+   ["https://www.ymca.net/", "YMCA"],
+   ["https://www.goodwill.org/", "Goodwill Industries"],
+   ["https://www.foodforthepoor.org", "Food for the Poor"],
+   ["https://www.directrelief.org/", "Direct Relief"],
+   ["https://www.cancer.org/", "American Cancer Society"]
+   ]
